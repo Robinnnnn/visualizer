@@ -71,7 +71,7 @@ function init() {
 	renderer = new THREE.WebGLRenderer();
 	renderer.setPixelRatio(window.devicePixelRatio);
 	renderer.setSize(window.innerWidth, window.innerHeight);
-	renderer.setBackgroundColor(0xffffff); // background color
+	renderer.setBackgroundColor(0x000000); // background color
 	container.appendChild(renderer.domElement);
 
 
@@ -157,17 +157,17 @@ function modulateColor(seconds) { // make this dependent on frame count instead 
 
 function colorSlider(rgbCounter) {
 	if (rgbCounter % 6 === 1) {
-		material.color.g = 1.4 - rgbTracker;
+		material.color.g = 1.5 - rgbTracker;
 	} else if (rgbCounter % 6 === 2) {
-		material.color.r = 1.4 - rgbTracker;
+		material.color.r = 1.5 - rgbTracker;
 	} else if (rgbCounter % 6 === 3) {
-		material.color.b = 1.4 - rgbTracker;
+		material.color.b = 1.5 - rgbTracker;
 	} else if (rgbCounter % 6 === 4) {
-		material.color.g = 1.4 - rgbTracker;
+		material.color.g = 1.5 - rgbTracker;
 	} else if (rgbCounter % 6 === 5) {
-		material.color.r = 1.4 - rgbTracker;
+		material.color.r = 1.5 - rgbTracker;
 	} else if (rgbCounter % 6 === 0) {
-		material.color.b = 1.4 - rgbTracker;
+		material.color.b = 1.5 - rgbTracker;
 	}
 }
 
@@ -185,16 +185,29 @@ function render() {
 
 			for (var iy = 0; iy < AMOUNTY; iy++) {
 
-				var scale = (array[k] * 4);
+				var frequencyStrength = (array[k] * 5);
 
 				particle = particles[i++];
+
 				// particle.scale.x = particle.scale.y = 15; // size
+				// // Varying Pulse
+				// particle.scale.x = particle.scale.y =
+				// 	(Math.sin((ix + frameCount) * 0.3) + 1) * 4 +
+				// 	(Math.sin((iy + frameCount) * 0.5) + 1) * 4;
+
 				// Standard Pulse
 				particle.scale.x = particle.scale.y =
 					(Math.sin(Math.sin((ix + frameCount)) * 0.3) + 1) * 12 +
 					(Math.sin(Math.sin(iy + frameCount) * 0.5) + 1) * 12;
-				particle.position.y = scale - 500;
-				// particle.position.y = Math.sin(scale) * 100 + Math.cos(scale) * 100
+
+				// // Undulating
+				// particle.position.x = frequencyStrength -
+				// 	(Math.sin((ix + frameCount) * 0.3) * 200) +
+				// 	(Math.sin((iy + frameCount) * 0.5) * 200);
+				// particle.position.y = scale -
+				// 	Math.cos((ix + frameCount) * 0.3) * 200 + (Math.cos((iy + frameCount) * 0.5) * 200);
+
+				particle.position.y = frequencyStrength - ((450 - i) * 0.8) - 600;
 
 				k += (k < array.length ? 1 : 0);
 			}
@@ -268,10 +281,11 @@ function render() {
 	// 		// 	(Math.sin(Math.tan((iy + frameCount)) * 0.5) + 1) * 4;
 	// 	}
 	// }
-	material.color.r = material.color.g = material.color.b = 0
 
-	// modulateColor(0.5);
-	// colorSlider(rgbCounter);
+	// material.color.r = material.color.g = material.color.b = 0
+
+	modulateColor(2);
+	colorSlider(rgbCounter);
 
 	renderer.render(scene, camera);
 

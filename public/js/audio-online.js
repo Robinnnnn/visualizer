@@ -39,8 +39,6 @@ request.onload = function() {
 				return;
 			}
 
-			console.log('goodbye')
-
 			// processor node
 			sourceJs = context.createScriptProcessor(2048, 1, 1);
 			sourceJs.buffer = buffer;
@@ -49,7 +47,7 @@ request.onload = function() {
 
 			// analyser node
 			analyser = context.createAnalyser();
-			analyser.smoothingTimeConstant = 0.90;
+			analyser.smoothingTimeConstant = 0.9;
 			analyser.fftSize = 2048;
 			console.log('analyser:', analyser);
 
@@ -68,11 +66,11 @@ request.onload = function() {
 			sourceJs.onaudioprocess = function(e) { // store and analyze frequency data
 				array = new Uint8Array(analyser.frequencyBinCount);
 				analyser.getByteFrequencyData(array);
-				boost = 100;
-				for (var i = 0; i < array.length; i++) {
-					boost += array[i];
-				}
-				boost = boost / array.length;
+				// boost = 0;
+				// for (var i = 0; i < array.length; i++) {
+				// 	boost += array[i];
+				// }
+				// boost = boost / array.length;
 				// console.log(array, boost);
 			};
 
