@@ -1,11 +1,11 @@
-var SEPARATION = 150,
+var SEPARATION = 200,
 	AMOUNTX = 30,
 	AMOUNTY = 15,
 	AMOUNTZ = 10;
 
 var colorSwitch = 1, // determines whether colors get brighter or darker
-	rgbTracker = 0, // determines strength of color
-	rgbCounter = 0;
+	rgbTracker = 0.75, // determines strength of color
+	rgbCounter = 1;
 
 var container;
 var camera, scene, renderer, material;
@@ -20,14 +20,77 @@ var windowHalfY = window.innerHeight / 2;
 
 init();
 animate();
+// initGUI();
+
+// // INTERFACE FOR FIDDLING
+// function initGUI() {
+
+// 	var gui = new dat.GUI();
+
+// 	gui.add(effectController, "Particles").onChange(function(value) {
+// 		pointCloud.visible = value;
+// 	});
+// 	gui.add(effectController, "Lines").onChange(function(value) {
+// 		linesMesh.visible = value;
+// 	});
+// 	gui.add(effectController, "Min_Distance", 10, 200);
+// 	gui.add(effectController, "Num_Particles", 0, maxParticleCount, 1).onChange(function(value) {
+
+// 		particleCount = parseInt(value);
+// 		particles.drawcalls[0].count = particleCount;
+
+// 	});
+
+// 	// Play/pause
+// 	gui.add(effectController, "Play").onChange(function(value) {
+// 		playing = value;
+// 		if (playing) {
+// 			requestAnimationFrame(animate);
+// 			render();
+// 		}
+// 	});
+
+// 	// User's choice
+// 	gui.add(effectController, 'Shape', ['Sphere', 'Hyperboloid', 'Snake']).onChange(function(value) {
+// 		if (effectController.Shape === 'Sphere') {
+// 			effectController.Min_Distance = 40; // this isn't working
+// 			particleInitiator(setSphere, resetSphere);
+
+// 			// reset line material
+// 			group.remove(linesMesh)
+// 			setMaterial(0x3cee06);
+
+// 		} else if (effectController.Shape === 'Hyperboloid') {
+// 			effectController.Min_Distance = 30; // this isn't working
+// 			particleInitiator(setSphere, resetHyperboloid);
+
+// 			group.remove(linesMesh)
+// 			setMaterial(0xff4c4c);
+
+// 		} else if (effectController.Shape === 'Snake') {
+// 			effectController.Min_Distance = 30; // this isn't working
+// 			particleInitiator(setSphere, resetSnake);
+
+// 			group.remove(linesMesh)
+// 			setMaterial(0x3cee06);
+// 		}
+// 	});
+
+// 	// gui.add(effectController, "Abandon").onChange(function(value) {
+// 	// 	if (value) particleData.velocity.y = particleData.velocity.y;
+// 	// });
+// }
 
 function init() {
-
 	container = document.createElement('div');
 	document.body.appendChild(container);
 
+	// camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
 	camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
-	camera.position.z = 3000;
+	camera.position.z = 3500;
+	// camera.position.y = 500;
+	// camera.position.x = 1000;
+	controls = new THREE.OrbitControls(camera, container); // orbital controls
 
 	scene = new THREE.Scene();
 
@@ -37,7 +100,7 @@ function init() {
 	var PI2 = Math.PI * 2;
 	material = new THREE.SpriteCanvasMaterial({
 
-		color: 0x000000, // dot color
+		color: 0xffffff, // dot color
 		program: function(context) {
 
 			context.beginPath();
@@ -97,42 +160,41 @@ function onWindowResize() {
 
 }
 
-//
-
+// mouse move functions
 function onDocumentMouseMove(event) {
 
-	mouseX = event.clientX - windowHalfX;
-	mouseY = event.clientY - windowHalfY;
+	// mouseX = event.clientX - windowHalfX;
+	// mouseY = event.clientY - windowHalfY;
 
 }
 
 function onDocumentTouchStart(event) {
 
-	if (event.touches.length === 1) {
+	// if (event.touches.length === 1) {
 
-		event.preventDefault();
+	// 	event.preventDefault();
 
-		mouseX = event.touches[0].pageX - windowHalfX;
-		mouseY = event.touches[0].pageY - windowHalfY;
+	// 	mouseX = event.touches[0].pageX - windowHalfX;
+	// 	mouseY = event.touches[0].pageY - windowHalfY;
 
-	}
+	// }
 
 }
 
 function onDocumentTouchMove(event) {
 
-	if (event.touches.length === 1) {
+	// if (event.touches.length === 1) {
 
-		event.preventDefault();
+	// 	event.preventDefault();
 
-		mouseX = event.touches[0].pageX - windowHalfX;
-		mouseY = event.touches[0].pageY - windowHalfY;
+	// 	mouseX = event.touches[0].pageX - windowHalfX;
+	// 	mouseY = event.touches[0].pageY - windowHalfY;
 
-	}
+	// }
 
 }
 
-//
+
 
 function animate() {
 	requestAnimationFrame(animate);
@@ -140,14 +202,14 @@ function animate() {
 }
 
 function modulateColor(seconds) { // make this dependent on frame count instead of FPS?
-	rgbTracker += colorSwitch * (0.5 / (seconds * 60))
+	rgbTracker += colorSwitch * (0.25 / (seconds * 60))
 
 	if (rgbTracker > 1) {
 		rgbTracker = 1;
 		colorSwitch *= -1
 		rgbCounter += 1
-	} else if (rgbTracker < 0.5) {
-		rgbTracker = 0.5;
+	} else if (rgbTracker < 0.7) {
+		rgbTracker = 0.7;
 		colorSwitch *= -1
 		rgbCounter += 1
 	}
@@ -157,57 +219,275 @@ function modulateColor(seconds) { // make this dependent on frame count instead 
 
 function colorSlider(rgbCounter) {
 	if (rgbCounter % 6 === 1) {
-		material.color.g = 1.5 - rgbTracker;
+		material.color.g = 1.75 - rgbTracker;
 	} else if (rgbCounter % 6 === 2) {
-		material.color.r = 1.5 - rgbTracker;
+		material.color.r = 1.75 - rgbTracker;
 	} else if (rgbCounter % 6 === 3) {
-		material.color.b = 1.5 - rgbTracker;
+		material.color.b = 1.75 - rgbTracker;
 	} else if (rgbCounter % 6 === 4) {
-		material.color.g = 1.5 - rgbTracker;
+		material.color.g = 1.75 - rgbTracker;
 	} else if (rgbCounter % 6 === 5) {
-		material.color.r = 1.5 - rgbTracker;
+		material.color.r = 1.75 - rgbTracker;
 	} else if (rgbCounter % 6 === 0) {
-		material.color.b = 1.5 - rgbTracker;
+		material.color.b = 1.75 - rgbTracker;
 	}
 }
 
 function render() {
+	controls.update();
 
-	camera.position.x += (mouseX - camera.position.x) * .05;
-	camera.position.y += (-mouseY - camera.position.y) * .05;
-	camera.lookAt(scene.position);
+	// // mouse move FX
+	// camera.position.x += (mouseX - camera.position.x) * .05;
+	// camera.position.y += (-mouseY - camera.position.y) * .05;
+	// camera.lookAt(scene.position);
 
 	if (typeof array === 'object' && array.length > 0) {
 		var i = 0;
-
-		var k = 0;
+		var k = 45;
 		for (var ix = 0; ix < AMOUNTX; ix++) {
-
 			for (var iy = 0; iy < AMOUNTY; iy++) {
-
-				var frequencyStrength = (array[k] * 5);
+				var frequencyStrength = (array[k] * 13);
 
 				particle = particles[i++];
 
-				// particle.scale.x = particle.scale.y = 15; // size
+				/* REACTIVE */
+				/* Particle Wave */
+				// Background: Black or White
+				// Particles: White or Black
+				// AMOUNTX: 50
+				// AMOUNTY: 50
+				// Separation: 100
+				// Camera position: 3000
+				// Standard Wave
+				// particle.position.y =
+				// 	(Math.sin((ix + frameCount) * 0.5) * 75) +
+				// 	(Math.sin((iy + frameCount) * 0.5) * 75);
 				// // Varying Pulse
 				// particle.scale.x = particle.scale.y =
 				// 	(Math.sin((ix + frameCount) * 0.3) + 1) * 4 +
 				// 	(Math.sin((iy + frameCount) * 0.5) + 1) * 4;
 
-				// Standard Pulse
-				particle.scale.x = particle.scale.y =
-					(Math.sin(Math.sin((ix + frameCount)) * 0.3) + 1) * 12 +
-					(Math.sin(Math.sin(iy + frameCount) * 0.5) + 1) * 12;
+				/* Matrix */
+				// Background: Black or White
+				// Particles: White or Black
+				// AMOUNTX: 50
+				// AMOUNTY: 50
+				// Separation: 100
+				// Camera position: 3000
+				// particle.position.y =
+				// 	(Math.tan((ix + frameCount) * 0.3) * 50) +
+				// 	(Math.tan((iy + frameCount) * 0.5) * 50);
+				// // Varying Pulse
+				// particle.scale.x = particle.scale.y =
+				// 	(Math.sin((ix + frameCount) * 0.3) + 1) * 4 +
+				// 	(Math.sin((iy + frameCount) * 0.5) + 1) * 4;
 
+				/* Frequency Blanket [Large] */
+				// Background: Black
+				// Particles: White
+				// AMOUNTX: 30
+				// AMOUNTY: 15
+				// Separation: 150
+				// Camera position: 3000
+				// k value: 5
+				// analyser.smoothingTimeConstant = 0.95
+				// particle.scale.x = particle.scale.y =
+				// 	(Math.sin(Math.sin((ix + frameCount)) * 0.3) + 1) * 10 +
+				// 	(Math.sin(Math.sin(iy + frameCount) * 0.5) + 1) * 10;
+				// particle.position.y = frequencyStrength - ((450 - i) * 0.8) - 600;
+
+				/* Frequency Blanket[Small] */
+				// Background: Black
+				// Particles: White
+				// AMOUNTX: 30
+				// AMOUNTY: 15
+				// Separation: 100
+				// Camera position: 3000
+				// k value: 8
+				// particle.scale.x = particle.scale.y =
+				// 	(Math.sin(Math.sin((ix + frameCount)) * 0.5) + 1) * 10 +
+				// 	(Math.sin(Math.sin(iy + frameCount) * 0.5) + 1) * 10;
+				// particle.position.y = frequencyStrength - ((450 - i) * 1.5) - 1000;
+
+				/* Magic Carpet */
+				// Background: Black
+				// Particles: Color (1.75)
+				// AMOUNTX: 30
+				// AMOUNTY: 15
+				// Separation: 150
+				// Camera.z: 3100
+				// Camera.y: 500
+				// k value: 14
+				// analyser.smoothingTimeConstant = 0.97 or 96
+				// particle.scale.x = particle.scale.y =
+				// 	(Math.sin((ix + frameCount) * 0.5) + 1) * 10 +
+				// 	(Math.sin((iy + frameCount) * 0.5) + 1) * 10;
+				// particle.position.y =
+				// 	(Math.sin((ix + frameCount) * 0.1) * 300) +
+				// 	(Math.sin((iy + frameCount) * 0.1) * 300) +
+				// 	frequencyStrength - 1200 - ((450 - i) * 2);
+
+				/* Serpent */
+				// Background: Black
+				// Particles: White / Colored
+				// If colored make bright (1.7)
+				// AMOUNTX: 75
+				// AMOUNTY: 25
+				// Separation: 150
+				// // Camera.z: 4500
+				// particle.scale.x = particle.scale.y =
+				// 	(Math.sin((ix + frameCount) * 0.3) + 1) * 6 +
+				// 	(Math.sin((iy + frameCount) * 0.5) + 1) * 6;
 				// // Undulating
-				// particle.position.x = frequencyStrength -
-				// 	(Math.sin((ix + frameCount) * 0.3) * 200) +
-				// 	(Math.sin((iy + frameCount) * 0.5) * 200);
-				// particle.position.y = scale -
-				// 	Math.cos((ix + frameCount) * 0.3) * 200 + (Math.cos((iy + frameCount) * 0.5) * 200);
+				// particle.position.x =
+				// 	(Math.sin((ix + frameCount) * 0.3) * 700) +
+				// 	(Math.sin((iy + frameCount) * 0.3) * 700);
+				// particle.position.y = -2500 + (i * 4)
+				// particle.position.y += frequencyStrength * 0.7
 
-				particle.position.y = frequencyStrength - ((450 - i) * 0.8) - 600;
+				/* Swirl */
+				/* *** LOOK FROM TOP AND USE AS OPTICAL ILLUSION *** */
+				// Background: Black
+				// Particles: White / Colored
+				// If colored make bright (1.7)
+				// AMOUNTX: 75
+				// AMOUNTY: 25
+				// Separation: 150
+				// Camera position: 4500
+				// particle.scale.x = particle.scale.y =
+				// 	(Math.sin((ix + frameCount) * 0.5) + 1) * 10 +
+				// 	(Math.sin((iy + frameCount) * 0.5) + 1) * 10;
+				// // Undulating
+				// particle.position.x =
+				// 	(Math.sin((ix + frameCount / 20) * 3) * 1000) +
+				// 	(Math.sin((iy + frameCount / 20) * 3) * 1000)
+				// particle.position.y = -4000 + (i * 6)
+				// particle.position.y += frequencyStrength * 1
+
+				/* Merry Go Round */
+				// Background: Black
+				// Particles: Color (1.75)
+				// AMOUNTX: 30
+				// AMOUNTY: 15
+				// Separation: 200
+				// Camera.z: 5000
+				// Camera.y: 0
+				// k value: 15
+				// particle.scale.x = particle.scale.y =
+				// 	(Math.sin((ix + frameCount) * 0.3) + 1) * 10 +
+				// 	(Math.sin((iy + frameCount) * 0.5) + 1) * 10;
+				// // Undulating
+				// particle.position.x =
+				// 	(Math.sin((ix + frameCount / 3) * 0.5) * 1000) +
+				// 	(Math.sin((iy + frameCount / 3) * 0.5) * 1000);
+				// particle.position.y = i * 8 - 3000 + frequencyStrength - ((450 - i) * 1.5)
+
+				/* Tsunami */
+				// Background: Black
+				// Particles: Color (1.75)
+				// AMOUNTX: 30
+				// AMOUNTY: 15
+				// Separation: 200
+				// Camera.z: 3500
+				// Camera.y: 0
+				// k value: 15
+				// particle.scale.x = particle.scale.y =
+				// 	(Math.sin((ix + frameCount) * 0.3) + 1) * 8 +
+				// 	(Math.sin((iy + frameCount) * 0.5) + 1) * 8;
+				// // Undulating
+				// particle.position.x =
+				// 	(Math.sin((ix + frameCount / 3) * 0.1) * 1000) +
+				// 	(Math.sin((iy + frameCount / 3) * 0.1) * 1000);
+				// particle.position.y = i * 4 - 2000 + frequencyStrength - ((450 - i) * 1.5)
+
+				/* STATIC */
+				/* Spiral Tower */
+				// Background: Black
+				// Particles: White / Colored
+				// If colored make bright (1.7)
+				// AMOUNTX: 75
+				// AMOUNTY: 25
+				// Separation: 150
+				// Camera position: 3000
+				// particle.scale.x = particle.scale.y =
+				// 	(Math.sin((ix + frameCount) * 0.3) + 1) * 4 +
+				// 	(Math.sin((iy + frameCount) * 0.5) + 1) * 4;
+				// // Undulating
+				// particle.position.x =
+				// 	(Math.sin((ix + frameCount) * 0.3) * 500) +
+				// 	(Math.sin((iy + frameCount) * 0.3) * 500);
+				// particle.position.y = -2500 + (i * 3)
+
+				/* Helix */
+				// Background: Black
+				// Particles: White / Colored
+				// If colored make bright (1.7)
+				// AMOUNTX: 75
+				// AMOUNTY: 25
+				// Separation: 150
+				// Camera position: 5000
+				// particle.scale.x = particle.scale.y =
+				// 	(Math.sin((ix + frameCount) * 0.5) + 1) * 7 +
+				// 	(Math.sin((iy + frameCount) * 0.5) + 1) * 7;
+				// // Undulating
+				// particle.position.x =
+				// 	(Math.sin((ix + frameCount / 20) * 3) * 700) +
+				// 	(Math.sin((iy + frameCount / 20) * 3) * 700)
+				// particle.position.y = -2500 + (i * 3)
+
+				/* Radiating */
+				// Background: Black
+				// Particles: White / Colored
+				// If colored make bright (1.7)
+				// AMOUNTX: 75
+				// AMOUNTY: 25
+				// Separation: 150
+				// Camera position: 5000
+				// particle.scale.x = particle.scale.y =
+				// 	(Math.sin((ix + frameCount) * 0.5) + 1) * 7 +
+				// 	(Math.sin((iy + frameCount) * 0.5) + 1) * 7;
+				// // Undulating
+				// particle.position.x =
+				// 	(Math.sin((ix + frameCount / 10) * 1) * 3000)
+				// 	// (Math.sin((iy + frameCount / 20) * 3) * 700)
+				// particle.position.y = -2500 + (i * 3)
+
+				/* Galaxy */
+				// Background: Black
+				// Particles: White / Colored
+				// If colored make bright (1.7)
+				// AMOUNTX: 75
+				// AMOUNTY: 25
+				// Separation: 150
+				// Camera position: 1000
+				// particle.scale.x = particle.scale.y =
+				// 	(Math.sin((ix + frameCount) * 0.5) + 1) * 7 +
+				// 	(Math.sin((iy + frameCount) * 0.5) + 1) * 7;
+				// // Undulating
+				// particle.position.x =
+				// 	(Math.sin((ix + frameCount / 1500) * 100) * 300) +
+				// 	(Math.sin((iy + frameCount / 1500) * 1) * 300);
+				// particle.position.y = -2500 + (i * 3)
+
+				/* Jellyfish */
+				// Background: Black
+				// Particles: White / Colored
+				// If colored make bright (1.7)
+				// AMOUNTX: 75
+				// AMOUNTY: 25
+				// Separation: 150
+				// Camera.z: 0
+				// Camera.y: -4000
+				// Camera.x: 1000
+				// particle.scale.x = particle.scale.y =
+				// 	(Math.sin((ix + frameCount) * 0.3) + 1) * 4 +
+				// 	(Math.sin((iy + frameCount) * 0.5) + 1) * 4;
+				// // Undulating
+				// particle.position.x =
+				// 	(Math.sin((ix + frameCount) * 0.1) * 500) +
+				// 	(Math.sin((iy + frameCount) * 0.1) * 500);
+				// particle.position.y = -2500 + (i * 3)
+
 
 				k += (k < array.length ? 1 : 0);
 			}
@@ -282,12 +562,12 @@ function render() {
 	// 	}
 	// }
 
-	// material.color.r = material.color.g = material.color.b = 0
+	// material.color.b = material.color.g = 1
+	// material.color.r = 1.6 - rgbTracker;
 
-	modulateColor(2);
+	modulateColor(6);
 	colorSlider(rgbCounter);
 
 	renderer.render(scene, camera);
-
 	frameCount += 0.1; // do something about resetting this to 0
 }
