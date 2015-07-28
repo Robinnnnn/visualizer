@@ -1,6 +1,6 @@
-var SEPARATION = 200,
-	AMOUNTX = 30,
-	AMOUNTY = 15,
+var SEPARATION = 100,
+	AMOUNTX = 50,
+	AMOUNTY = 50,
 	AMOUNTZ = 10;
 
 var colorSwitch = 1, // determines whether colors get brighter or darker
@@ -17,69 +17,70 @@ var mouseX = 0,
 
 var windowHalfX = window.innerWidth / 2;
 var windowHalfY = window.innerHeight / 2;
+var settings;
+
+var frameRate = 0.1;
 
 init();
 animate();
-// initGUI();
 
-// // INTERFACE FOR FIDDLING
-// function initGUI() {
+var SettingsController = function() {
+	this.Speed = 5;
+	this.Play = true;
+	this.reactiveShapes = function() {};
+	this.staticShapes = function() {};
+};
 
-// 	var gui = new dat.GUI();
+initGUI();
 
-// 	gui.add(effectController, "Particles").onChange(function(value) {
-// 		pointCloud.visible = value;
-// 	});
-// 	gui.add(effectController, "Lines").onChange(function(value) {
-// 		linesMesh.visible = value;
-// 	});
-// 	gui.add(effectController, "Min_Distance", 10, 200);
-// 	gui.add(effectController, "Num_Particles", 0, maxParticleCount, 1).onChange(function(value) {
+// INTERFACE FOR FIDDLING
+function initGUI() {
+	settings = new SettingsController();
+	var gui = new dat.GUI();
+	gui.add(settings, 'Speed', 0, 10).onChange(function(value) {
+		frameRate = value * 0.02;
+	});
+	gui.add(settings, 'Play');
+	gui.add(settings, 'reactiveShapes', ['Blanket', 'Cloth', 'Magic Carpet', 'Serpent', 'Swirl', 'Tsunami']).onChange(function(choice) {
+		console.log(choice)
+	});
+	gui.add(settings, 'staticShapes', ['Particle Wave', 'Spiral Tower', 'Helix', 'Jellyfish', 'Galaxy', 'Matrix']).onChange(function(choice) {
+			console.log(choice)
+		})
+		// // Play/pause
+		// gui.add(effectController, "Play").onChange(function(value) {
+		// 	// playing = value;
+		// 	// if (playing) {
+		// 	// 	requestAnimationFrame(animate);
+		// 	// 	render();
+		// 	// }
+		// });
 
-// 		particleCount = parseInt(value);
-// 		particles.drawcalls[0].count = particleCount;
+	// // User's choice
+	// gui.add(effectController, 'Shape', ['Sphere', 'Hyperboloid', 'Snake']).onChange(function(value) {
+	// 	// if (effectController.Shape === 'Sphere') {
+	// 	// 	effectController.Min_Distance = 40; // this isn't working
+	// 	// 	particleInitiator(setSphere, resetSphere);
 
-// 	});
+	// 	// 	// reset line material
+	// 	// 	group.remove(linesMesh)
+	// 	// 	setMaterial(0x3cee06);
 
-// 	// Play/pause
-// 	gui.add(effectController, "Play").onChange(function(value) {
-// 		playing = value;
-// 		if (playing) {
-// 			requestAnimationFrame(animate);
-// 			render();
-// 		}
-// 	});
+	// 	// } else if (effectController.Shape === 'Hyperboloid') {
+	// 	// 	effectController.Min_Distance = 30; // this isn't working
+	// 	// 	particleInitiator(setSphere, resetHyperboloid);
 
-// 	// User's choice
-// 	gui.add(effectController, 'Shape', ['Sphere', 'Hyperboloid', 'Snake']).onChange(function(value) {
-// 		if (effectController.Shape === 'Sphere') {
-// 			effectController.Min_Distance = 40; // this isn't working
-// 			particleInitiator(setSphere, resetSphere);
+	// 	// 	group.remove(linesMesh)
+	// 	// 	setMaterial(0xff4c4c);
 
-// 			// reset line material
-// 			group.remove(linesMesh)
-// 			setMaterial(0x3cee06);
+	// 	// } else if (effectController.Shape === 'Snake') {
+	// 	// 	effectController.Min_Distance = 30; // this isn't working
+	// 	// 	particleInitiator(setSphere, resetSnake);
 
-// 		} else if (effectController.Shape === 'Hyperboloid') {
-// 			effectController.Min_Distance = 30; // this isn't working
-// 			particleInitiator(setSphere, resetHyperboloid);
-
-// 			group.remove(linesMesh)
-// 			setMaterial(0xff4c4c);
-
-// 		} else if (effectController.Shape === 'Snake') {
-// 			effectController.Min_Distance = 30; // this isn't working
-// 			particleInitiator(setSphere, resetSnake);
-
-// 			group.remove(linesMesh)
-// 			setMaterial(0x3cee06);
-// 		}
-// 	});
-
-// 	// gui.add(effectController, "Abandon").onChange(function(value) {
-// 	// 	if (value) particleData.velocity.y = particleData.velocity.y;
-// 	// });
-// }
+	// 	// 	group.remove(linesMesh)
+	// 	// 	setMaterial(0x3cee06);
+	// 	// }
+}
 
 function init() {
 	container = document.createElement('div');
@@ -87,7 +88,7 @@ function init() {
 
 	// camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
 	camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
-	camera.position.z = 3500;
+	camera.position.z = 3000;
 	// camera.position.y = 500;
 	// camera.position.x = 1000;
 	controls = new THREE.OrbitControls(camera, container); // orbital controls
@@ -233,6 +234,10 @@ function colorSlider(rgbCounter) {
 	}
 }
 
+function incrementFrame() {
+	frameCount += frameRate;
+}
+
 function render() {
 	controls.update();
 
@@ -259,13 +264,13 @@ function render() {
 				// Separation: 100
 				// Camera position: 3000
 				// Standard Wave
-				// particle.position.y =
-				// 	(Math.sin((ix + frameCount) * 0.5) * 75) +
-				// 	(Math.sin((iy + frameCount) * 0.5) * 75);
-				// // Varying Pulse
-				// particle.scale.x = particle.scale.y =
-				// 	(Math.sin((ix + frameCount) * 0.3) + 1) * 4 +
-				// 	(Math.sin((iy + frameCount) * 0.5) + 1) * 4;
+				particle.position.y =
+					(Math.sin((ix + frameCount) * 0.5) * 75) +
+					(Math.sin((iy + frameCount) * 0.5) * 75);
+				// Varying Pulse
+				particle.scale.x = particle.scale.y =
+					(Math.sin((ix + frameCount) * 0.3) + 1) * 4 +
+					(Math.sin((iy + frameCount) * 0.5) + 1) * 4;
 
 				/* Matrix */
 				// Background: Black or White
@@ -569,5 +574,6 @@ function render() {
 	colorSlider(rgbCounter);
 
 	renderer.render(scene, camera);
-	frameCount += 0.1; // do something about resetting this to 0
+	// frameCount += 0.1; // do something about resetting this to 0
+	incrementFrame();
 }
