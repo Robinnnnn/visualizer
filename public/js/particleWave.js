@@ -40,7 +40,9 @@ function initGUI() {
 	gui.add(settings, 'Speed', 0, 10).onChange(function(value) {
 		frameRate = value * 0.02;
 	});
-	gui.add(settings, 'Play');
+	gui.add(settings, 'Play').onChange(function(value){
+		frameRate = value ? 0.1 : 0
+	});
 	gui.add(settings, 'reactiveShapes', ['Blanket', 'Cloth', 'Magic Carpet', 'Serpent', 'Swirl', 'Tsunami']).onChange(function(choice) {
 		console.log(choice)
 		if (choice === 'Cloth') {
@@ -577,6 +579,6 @@ function render() {
 	colorSlider(rgbCounter);
 
 	renderer.render(scene, camera);
-	// frameCount += 0.1; // do something about resetting this to 0
-	incrementFrame();
+	frameCount += frameRate; // do something about resetting this to 0
+	// incrementFrame();
 }
