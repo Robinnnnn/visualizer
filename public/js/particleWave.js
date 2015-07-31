@@ -1,6 +1,6 @@
-var SEPARATION = 100,
-	AMOUNTX = 50,
-	AMOUNTY = 50,
+var SEPARATION = 150,
+	AMOUNTX = 75,
+	AMOUNTY = 25,
 	AMOUNTZ = 10;
 
 var colorSwitch = 1, // determines whether colors get brighter or darker
@@ -43,6 +43,9 @@ function initGUI() {
 	gui.add(settings, 'Play');
 	gui.add(settings, 'reactiveShapes', ['Blanket', 'Cloth', 'Magic Carpet', 'Serpent', 'Swirl', 'Tsunami']).onChange(function(choice) {
 		console.log(choice)
+		if (choice === 'Cloth') {
+			camera.position.z = 5000;
+		}
 	});
 	gui.add(settings, 'staticShapes', ['Particle Wave', 'Spiral Tower', 'Helix', 'Jellyfish', 'Galaxy', 'Matrix']).onChange(function(choice) {
 			console.log(choice)
@@ -88,7 +91,7 @@ function init() {
 
 	// camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
 	camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
-	camera.position.z = 3000;
+	camera.position.z = 5000;
 	// camera.position.y = 500;
 	// camera.position.x = 1000;
 	controls = new THREE.OrbitControls(camera, container); // orbital controls
@@ -209,8 +212,8 @@ function modulateColor(seconds) { // make this dependent on frame count instead 
 		rgbTracker = 1;
 		colorSwitch *= -1
 		rgbCounter += 1
-	} else if (rgbTracker < 0.7) {
-		rgbTracker = 0.7;
+	} else if (rgbTracker < 0.75) {
+		rgbTracker = 0.75;
 		colorSwitch *= -1
 		rgbCounter += 1
 	}
@@ -264,13 +267,13 @@ function render() {
 				// Separation: 100
 				// Camera position: 3000
 				// Standard Wave
-				particle.position.y =
-					(Math.sin((ix + frameCount) * 0.5) * 75) +
-					(Math.sin((iy + frameCount) * 0.5) * 75);
-				// Varying Pulse
-				particle.scale.x = particle.scale.y =
-					(Math.sin((ix + frameCount) * 0.3) + 1) * 4 +
-					(Math.sin((iy + frameCount) * 0.5) + 1) * 4;
+				// particle.position.y =
+				// 	(Math.sin((ix + frameCount) * 0.5) * 75) +
+				// 	(Math.sin((iy + frameCount) * 0.5) * 75);
+				// // Varying Pulse
+				// particle.scale.x = particle.scale.y =
+				// 	(Math.sin((ix + frameCount) * 0.3) + 1) * 4 +
+				// 	(Math.sin((iy + frameCount) * 0.5) + 1) * 4;
 
 				/* Matrix */
 				// Background: Black or White
@@ -287,7 +290,7 @@ function render() {
 				// 	(Math.sin((ix + frameCount) * 0.3) + 1) * 4 +
 				// 	(Math.sin((iy + frameCount) * 0.5) + 1) * 4;
 
-				/* Frequency Blanket [Large] */
+				/* Blanket */
 				// Background: Black
 				// Particles: White
 				// AMOUNTX: 30
@@ -301,7 +304,7 @@ function render() {
 				// 	(Math.sin(Math.sin(iy + frameCount) * 0.5) + 1) * 10;
 				// particle.position.y = frequencyStrength - ((450 - i) * 0.8) - 600;
 
-				/* Frequency Blanket[Small] */
+				/* Cloth */
 				// Background: Black
 				// Particles: White
 				// AMOUNTX: 30
@@ -431,14 +434,14 @@ function render() {
 				// AMOUNTY: 25
 				// Separation: 150
 				// Camera position: 5000
-				// particle.scale.x = particle.scale.y =
-				// 	(Math.sin((ix + frameCount) * 0.5) + 1) * 7 +
-				// 	(Math.sin((iy + frameCount) * 0.5) + 1) * 7;
-				// // Undulating
-				// particle.position.x =
-				// 	(Math.sin((ix + frameCount / 20) * 3) * 700) +
-				// 	(Math.sin((iy + frameCount / 20) * 3) * 700)
-				// particle.position.y = -2500 + (i * 3)
+				particle.scale.x = particle.scale.y =
+					(Math.sin((ix + frameCount) * 0.5) + 1) * 7 +
+					(Math.sin((iy + frameCount) * 0.5) + 1) * 7;
+				// Undulating
+				particle.position.x =
+					(Math.sin((ix + frameCount / 20) * 3) * 700) +
+					(Math.sin((iy + frameCount / 20) * 3) * 700)
+				particle.position.y = -2500 + (i * 3)
 
 				/* Radiating */
 				// Background: Black
@@ -570,7 +573,7 @@ function render() {
 	// material.color.b = material.color.g = 1
 	// material.color.r = 1.6 - rgbTracker;
 
-	modulateColor(6);
+	modulateColor(2);
 	colorSlider(rgbCounter);
 
 	renderer.render(scene, camera);
