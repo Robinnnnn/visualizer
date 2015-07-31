@@ -40,14 +40,13 @@ function initGUI() {
 	gui.add(settings, 'Speed', 0, 10).onChange(function(value) {
 		frameRate = value * 0.02;
 	});
-	gui.add(settings, 'Play').onChange(function(value){
+	gui.add(settings, 'Play').onChange(function(value) {
 		frameRate = value ? 0.1 : 0
 	});
-	gui.add(settings, 'reactiveShapes', ['Blanket', 'Cloth', 'Magic Carpet', 'Serpent', 'Swirl', 'Tsunami']).onChange(function(choice) {
+	gui.add(settings, 'reactiveShapes', ['Cloth', 'Blanket', 'Magic Carpet', 'Serpent', 'Swirl', 'Tsunami']).onChange(function(choice) {
 		console.log(choice)
-		if (choice === 'Cloth') {
-			camera.position.z = 5000;
-		}
+		deanimate();
+		reanimate(choice);
 	});
 	gui.add(settings, 'staticShapes', ['Particle Wave', 'Spiral Tower', 'Helix', 'Jellyfish', 'Galaxy', 'Matrix']).onChange(function(choice) {
 			console.log(choice)
@@ -93,15 +92,10 @@ function init() {
 
 	// camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
 	camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
-	camera.position.z = 5000;
-	// camera.position.y = 500;
-	// camera.position.x = 1000;
+	setCamera(0, 0, 5000);
 	controls = new THREE.OrbitControls(camera, container); // orbital controls
-
 	scene = new THREE.Scene();
-
 	particles = new Array();
-
 
 	var PI2 = Math.PI * 2;
 	material = new THREE.SpriteCanvasMaterial({
@@ -117,25 +111,7 @@ function init() {
 
 	});
 
-	var i = 0;
-
-	for (var ix = 0; ix < AMOUNTX; ix++) {
-		for (var iy = 0; iy < AMOUNTY; iy++) {
-
-			particle = particles[i++] = new THREE.Sprite(material);
-			particle.position.x = ix * SEPARATION - ((AMOUNTX * SEPARATION) / 2);
-			particle.position.z = iy * SEPARATION - ((AMOUNTY * SEPARATION) / 2);
-			scene.add(particle);
-
-			// // Second Layer
-			// particle2 = particles[i++] = new THREE.Sprite(material);
-			// particle2.position.x = ix * SEPARATION - ((AMOUNTX * SEPARATION) / 2);
-			// particle2.position.z = iy * SEPARATION - ((AMOUNTY * SEPARATION) / 2);
-			// scene.add(particle2);
-
-		}
-	}
-
+	buildParticles(AMOUNTX, AMOUNTY, 150);
 
 	renderer = new THREE.WebGLRenderer();
 	renderer.setPixelRatio(window.devicePixelRatio);
@@ -151,7 +127,6 @@ function init() {
 	//
 
 	window.addEventListener('resize', onWindowResize, false);
-
 }
 
 function onWindowResize() {
@@ -207,6 +182,10 @@ function animate() {
 	render();
 }
 
+function deanimate() {
+	scene = new THREE.Scene();
+}
+
 function modulateColor(seconds) { // make this dependent on frame count instead of FPS?
 	rgbTracker += colorSwitch * (0.25 / (seconds * 60))
 
@@ -257,7 +236,12 @@ function render() {
 		for (var ix = 0; ix < AMOUNTX; ix++) {
 			for (var iy = 0; iy < AMOUNTY; iy++) {
 				var frequencyStrength = (array[k] * 13);
+				console.log(particles.length)
 
+				if (!particles.length) {
+					console.log('no length')
+					return
+				}
 				particle = particles[i++];
 
 				/* REACTIVE */
