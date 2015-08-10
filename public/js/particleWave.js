@@ -35,13 +35,13 @@ function initGUI() {
 	gui.add(settings, 'Play').onChange(function(value) {
 		frameRate = value ? 0.1 : 0
 	});
-	gui.add(settings, 'Reactive', ['Pick One!', 'MagicCarpet', 'Circus', 'Pancakes', 'Serpent', 'Swirl']).onChange(function(choice) {
+	gui.add(settings, 'Reactive', ['Pick One!', 'MagicCarpet', 'Circus']).onChange(function(choice) {
 		if (choice !== 'Pick One!') {
 			currentShape = choice;
 			reanimate(currentShape);
 		}
 	})
-	gui.add(settings, 'Static', ['MagicCarpet', 'Pancakes', 'Sphere', 'Jellyfish', 'Bow', 'Slinky', 'Matrix', 'Serpent', 'Swirl']).onChange(function(choice) {
+	gui.add(settings, 'Static', ['Pick One!', 'Pancakes', 'Sphere', 'Matrix', 'Serpent', 'Jellyfish', 'Bow', 'Slinky', 'Swirl']).onChange(function(choice) {
 		if (choice !== 'Pick One!') {
 			currentShape = choice + 'Static';
 			reanimate(currentShape);
@@ -61,7 +61,7 @@ function init() {
 	particles = new Array();
 	createParticleMatter(0xffffff);
 
-	currentShape = 'MagicCarpetStatic'
+	currentShape = 'MagicCarpet'
 	buildShape(currentShape)
 
 	setRenderer(0x000000); // also sets background color
