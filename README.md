@@ -1,4 +1,4 @@
-# visualizer
+# 3D Music Visualizer
 
 3D music visualizer using Three.js and Web Audio API.
 
