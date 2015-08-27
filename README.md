@@ -1,5 +1,5 @@
 # 3D Music Visualizer
-An interactive, 3D music visualizer built using Three.js and Web Audio API.
+##### An interactive, 3D music visualizer built using Three.js and Web Audio API.
 
 You can click + drag your mouse to move the camera, and use the scroll to zoom! You can also explore different shapes in the sidebar.
 
@@ -7,7 +7,7 @@ Currently the animation performs best on Chrome. It may take a moment to load if
 
 <b><a href="http://bit.do/visualizer">Click me for a live demo!</a></b>
 
-# Method
+# Approach
 ### Audio
 
 The track itself is stored on dropbox, because they were the only free service I could find that provided secure hotlinks -- a requirement by Chrome when making an XMLHttpRequest.
@@ -28,6 +28,11 @@ When mapping raw sound data over the particles directly, the result was signific
 Creating visually striking shapes in 3D was one of the most difficult challenges of this project. I used a counter to keep track of the amount of frames that had been rendered, and used this number to represent the "time" variable in a series of parametric equations. I heavily utilized <a href="http://mathworld.wolfram.com/Sphere.html">Wolfram Alpha</a> to discover various equations to apply to the animation.
 
 I also discovered that a field of billowing sine waves, when viewed from a specific angle, produced an optical illusion that looked like a rotating helix. <i>I used such perspective tricks to my advantage throughout the project, to avoid having to actually program what the user thought they were seeing.</i>
+
+<img src="http://i.imgur.com/cikMgXJ.png" height="200" width="250">
+<img src="http://i.imgur.com/E6uCiAE.png" height="200" width="150">
+<img src="http://i.imgur.com/bsty3Pn.png" height="200" width="200">
+<img src="http://i.imgur.com/Ktxcjfr.png" height="200" width="200">
 
 ##### Color
 I wanted to come up with a way for the colors to continuously change over time. I also wanted to make sure to avoid "ugly" colors. After playing around with an <a href="http://www.calculatorcat.com/free_calculators/color_slider/rgb_hex_color_slider.phtml">RGB slider</a>, I discovered that incrementing between 0 and 1 for a specific color (R, G or B) while anchoring at least one other color at 1 helped keep the colors nice and pretty. There were 6 total states for this (3 colors * 2 possible positions for each color), so I developed an algorithm that triggered "color slides" between these states. I also created a helper function to manage the speed of the color shift simply by inputting a desired number of seconds. Finally, I bumped up the sliders to modulate between a range of 0.5 and 1.5 (as opposed to 0 and 1) to give them a lighter look.
