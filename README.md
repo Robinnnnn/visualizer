@@ -10,7 +10,7 @@ Currently the animation performs best on Chrome. It may take a moment to load if
 # Method
 ### Audio
 
-The track itself is stored on dropbox, because they were the only free service I could find that provided secure hotlinks -- a requirement by Chrome when making an XML HTTP request.
+The track itself is stored on dropbox, because they were the only free service I could find that provided secure hotlinks -- a requirement by Chrome when making an XMLHttpRequest.
 
 I used the Web Audio API (WAA) to convert the music into frequency data, specifically as a Javascript <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array">Uint8Array</a>. I set up and connected three nodes to represent the the audio buffer source, the script processor, and the analyzer. Setting the analyzer's <a href="https://en.wikipedia.org/wiki/Fast_Fourier_transform">fast fourier transform</a> size to 2048 helped increase the frequency resolution, or the number of "bins" on the analysis window. I also set the buffer size to 2048 after some experimenting, which seemed to strike a nice balance between latency and audio quality.
 
@@ -38,14 +38,25 @@ The sizes of each particle were determined by trigonometric functions dependent 
 ##### Particle Material
 I wanted each particle to be a miniature sphere. That said, generating and rendering hundreds of spheres in real time was taxing on the processor. Fortunately Three.js provided a material called a <i>sprite</i>, which was a 2D shape that always faced the user. This meant that the user always saw a circle despite changing his or her perspective, providing the illustion of a sphere without having to render any depth. 
 
-
-# Looking Forward
+# Major Challenges & Looking Forward
 ##### Optimized Linear Interpolation
+Linear interpolation -- also known as <i>lerping</i> -- requires datasets from multiple time periods. In order to apply <i>n</i> layers of lerping to the frequency data at <i>t = 0</i>, I needed access to the datasets from <i>t-1</i>, <i>t-2</i>, <i>t-3</i>, ... ,<i>t-n</i>. This provided to issues:
+1. It would be impossible to lerp the very first frame of data; nothing would render until the user was <i>n</i> frames into the animation.
+2. There would be an <i>n</i>-frame latency between what the animation and the music. <b>There was a tradeoff between making the animation look smooth and the delay perceived by the n-frame lag.</b>
 
+I basically wanted to get away with applying as many lerps as possible before the animation looked noticeably sluggish. The magic number seemed to be 5.
+
+In the future, I'd like to actually delay the animation and music playback according to the number of lerps I've applied to the data. This would provide an even smoother animation that is in perfect sync with the nusic. Though the animation would begin <i>n</i> frames later than usual, it would be negligible given the 60FPS framerate. 
 
 ##### Smart Color
+Currently the colors are set to cycle through a basic series of RGB combinations. It would be great to have the colors:
+1. Change according to elements in the music, such as a downbeat.
+2. Represent the frequencies and amplitude of the music (e.g. red = bass, loud = bright).
 
 ##### Music Customization
+Many users have requested a feature to hook up the visualizer to third-party webites such as YouTube or SoundCloud. This would be a major challenge given that I'm currenty playing and analyzing the music through an XMLHttpRequest that directly accesses a secure hotlink.
+
+One solution would be to request access to the user's internal microphone. It's certainly possible to produce animations from the user's external mic. If I could somehow prompt the user to set their mic settings to internal, I could potentially render music not only playing from a website, but from an application such as iTunes or Spotify.
 
 ##### More Particles
 The amount of frequency data I received from WAA limited me to animating ~512 particles. If I wanted to render a higher-resolution animation with the same number of frequency elements, I would create a new array with double or triple the original length, containing the original frequencies with newly calculated ones in between. Doing this brute-force at a rate of 60 times per second was too much for my processor so I'd have to come up with a more elegant algorithm.
