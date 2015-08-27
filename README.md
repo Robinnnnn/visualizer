@@ -29,8 +29,8 @@ Creating visually striking shapes in 3D was one of the most difficult challenges
 
 I also discovered that a field of billowing sine waves, when viewed from a specific angle, produced an optical illusion that looked like a rotating helix. <i>I used such perspective tricks to my advantage throughout the project, to avoid having to actually program what the user thought they were seeing.</i>
 
-<img src="http://i.imgur.com/cikMgXJ.png" height="200" width="250">
-<img src="http://i.imgur.com/E6uCiAE.png" height="200" width="150">
+<img src="http://i.imgur.com/cikMgXJ.png" height="400" width="500"">
+<img src="http://i.imgur.com/E6uCiAE.png" height="400" width="300">
 <img src="http://i.imgur.com/bsty3Pn.png" height="200" width="200">
 <img src="http://i.imgur.com/Ktxcjfr.png" height="200" width="200">
 
