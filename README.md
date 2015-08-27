@@ -31,8 +31,8 @@ I also discovered that a field of billowing sine waves, when viewed from a speci
 
 <img src="http://i.imgur.com/cikMgXJ.png" height="400" width="500"">
 <img src="http://i.imgur.com/E6uCiAE.png" height="400" width="300">
-<img src="http://i.imgur.com/bsty3Pn.png" height="200" width="200">
-<img src="http://i.imgur.com/Ktxcjfr.png" height="200" width="200">
+<img src="http://i.imgur.com/bsty3Pn.png" height="400" width="400">
+<img src="http://i.imgur.com/Ktxcjfr.png" height="400" width="400">
 
 ##### Color
 I wanted to come up with a way for the colors to continuously change over time. I also wanted to make sure to avoid "ugly" colors. After playing around with an <a href="http://www.calculatorcat.com/free_calculators/color_slider/rgb_hex_color_slider.phtml">RGB slider</a>, I discovered that incrementing between 0 and 1 for a specific color (R, G or B) while anchoring at least one other color at 1 helped keep the colors nice and pretty. There were 6 total states for this (3 colors * 2 possible positions for each color), so I developed an algorithm that triggered "color slides" between these states. I also created a helper function to manage the speed of the color shift simply by inputting a desired number of seconds. Finally, I bumped up the sliders to modulate between a range of 0.5 and 1.5 (as opposed to 0 and 1) to give them a lighter look.
