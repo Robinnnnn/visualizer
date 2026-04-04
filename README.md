@@ -1,11 +1,36 @@
 # 3D Music Visualizer
 ##### An interactive, 3D music visualizer built using Three.js and Web Audio API.
 
-You can click + drag your mouse to move the camera, and use the scroll to zoom! You can also explore different shapes in the sidebar.
+You can click + drag your mouse to move the camera, and use the scroll to zoom. You can also explore different shapes in the sidebar.
 
-Currently the animation performs best on Chrome. It may take a moment to load if it's your first visit to the site.
+Currently the animation performs best on Chromium-based browsers. It may take a moment to load the first time because the source track streams from an external URL.
 
-<b><a href="http://bit.do/visualizer">Click me for a live demo!</a></b>
+## Running locally
+
+Because this is a plain static site, you can run it with any simple file server from the repo root:
+
+```bash
+python3 -m http.server 4310
+```
+
+Then open:
+
+- `http://127.0.0.1:4310/`
+- or `http://127.0.0.1:4310/index.html`
+
+The visualizer now uses `index.html` as the main entry point. Audio playback requires a user click in modern browsers, so press the on-screen start button after the page loads.
+
+## Deploying to Cloudflare Pages
+
+This project does not need a build step.
+
+Recommended settings:
+
+- **Framework preset:** `None`
+- **Build command:** _leave blank_
+- **Build output directory:** `/`
+
+Cloudflare Pages can serve the repo as a static site directly. The one thing to keep an eye on is the external MP3 source URL — if that asset disappears or changes its CORS behavior, playback will stop working until the audio source is updated.
 
 # Approach
 ### Audio

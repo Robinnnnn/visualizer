@@ -17,154 +17,140 @@ var totalFrequencies;
 var frequenciesPrev;
 var averageDeltas = [];
 var averageAmp;
+var decodedBuffer;
+var started = false;
+var statusEl = document.getElementById('status');
+var playOverlayEl = document.getElementById('playOverlay');
+var playButtonEl = document.getElementById('playButton');
 
-// loading screen
-var interval = window.setInterval(function() {
-	if ($('#loading_dots').text().length < 3) {
-		$('#loading_dots').text($('#loading_dots').text() + '.');
-	} else {
-		$('#loading_dots').text('');
+function setStatus(message) {
+	if (statusEl) {
+		statusEl.textContent = message || '';
 	}
-}, 500);
-
-// make sure web audio API is supported
-try {
-	context = new AudioContext();
-} catch (e) {
-	$('#info').text('Web Audio API is not supported in this browser');
 }
 
-// load the audio file with an XMLHttpRequest...
+try {
+	context = new (window.AudioContext || window.webkitAudioContext)();
+} catch (e) {
+	setStatus('Web Audio API is not supported in this browser.');
+}
+
+if (!context) {
+	throw new Error('AudioContext is unavailable.');
+}
+
 var request = new XMLHttpRequest();
-request.open("GET", url, true);
-request.responseType = "arraybuffer";
-// https://developer.mozilla.org/en-US/docs/Web/API/AudioContext/createBufferSource
-var source = context.createBufferSource();
+request.open('GET', url, true);
+request.responseType = 'arraybuffer';
 
+function connectAudioGraph(buffer) {
+	sourceJs = context.createScriptProcessor(2048, 1, 1);
+	sourceJs.buffer = buffer;
+	sourceJs.connect(context.destination);
 
+	analyser = context.createAnalyser();
+	analyser.smoothingTimeConstant = 0.96;
+	analyser.fftSize = 2048;
 
-// ...and an asynchronous callback
+	source = context.createBufferSource();
+	source.buffer = buffer;
+	source.loop = true;
+
+	source.connect(analyser);
+	analyser.connect(sourceJs);
+	source.connect(context.destination);
+
+	Uint8Array.prototype.slice = Array.prototype.slice;
+	Uint8Array.prototype.forEach = Array.prototype.forEach;
+
+	sourceJs.onaudioprocess = function() {
+		frequencies = new Uint8Array(analyser.frequencyBinCount);
+		analyser.getByteFrequencyData(frequencies);
+
+		totalFrequencies = frequencies.length;
+		getAverageVolume(frequencies);
+
+		for (var i = 0; i < frequencies.length; i++) {
+			frequenciesNew[i] = frequencies[i] * 2;
+		}
+
+		if (lerpedFrequencies3.length) {
+			lerp(lerpedFrequencies3, lerpedFrequencies, lerpedFrequencies4, 0.1);
+		}
+
+		if (lerpedFrequencies2.length) {
+			lerp(lerpedFrequencies2, lerpedFrequencies, lerpedFrequencies3, 0.1);
+		}
+
+		if (lerpedFrequencies.length) {
+			lerp(lerpedFrequencies, frequencies, lerpedFrequencies2, 0.1);
+		}
+
+		if (frequenciesPrev) {
+			lerp(frequenciesNew, frequenciesPrev, lerpedFrequencies, 0.1);
+		}
+
+		if (frequenciesNew) {
+			frequenciesPrev = frequenciesNew.slice();
+		}
+	};
+}
+
 request.onload = function() {
+	setStatus('decoding track…');
+
 	context.decodeAudioData(
 		request.response,
 		function(buffer) {
 			if (!buffer) {
-				$('#info').text('Error decoding file data');
+				setStatus('Error decoding file data.');
 				return;
 			}
 
-			// processor node
-			sourceJs = context.createScriptProcessor(2048, 1, 1);
-			sourceJs.buffer = buffer;
-			sourceJs.connect(context.destination);
-
-			// analyser node
-			analyser = context.createAnalyser();
-			analyser.smoothingTimeConstant = 0.96;
-			analyser.fftSize = 2048;
-
-			// audio buffer source node
-			source = context.createBufferSource();
-			source.buffer = buffer;
-			source.loop = true;
-
-			// connect all the nodes
-			source.connect(analyser);
-			analyser.connect(sourceJs);
-			source.connect(context.destination); // final connection to the listener?
-
-			/* BOOT IT UP */
-			source.start(0);
-
-			Uint8Array.prototype.slice = Array.prototype.slice;
-			Uint8Array.prototype.forEach = Array.prototype.forEach;
-
-			sourceJs.onaudioprocess = function(e) { // store and analyze frequency data
-				frequencies = new Uint8Array(analyser.frequencyBinCount)
-
-				analyser.getByteFrequencyData(frequencies);
-
-				totalFrequencies = frequencies.length;
-				getAverageVolume(frequencies);
-
-				for (var i = 0; i < frequencies.length; i++) {
-					frequenciesNew[i] = frequencies[i] * 2;
-				}
-
-				// if (lerpedFrequencies4.length) {
-				// 	lerp(lerpedFrequencies4, lerpedFrequencies, lerpedFrequencies5, 0.1);
-				// }
-
-				if (lerpedFrequencies3.length) {
-					lerp(lerpedFrequencies3, lerpedFrequencies, lerpedFrequencies4, 0.1);
-				}
-
-				if (lerpedFrequencies2.length) {
-					lerp(lerpedFrequencies2, lerpedFrequencies, lerpedFrequencies3, 0.1);
-				}
-
-				if (lerpedFrequencies.length) {
-					lerp(lerpedFrequencies, frequencies, lerpedFrequencies2, 0.1);
-				}
-
-				if (frequenciesPrev) {
-					lerp(frequenciesNew, frequenciesPrev, lerpedFrequencies, 0.1);
-				}
-
-				if (frequenciesNew) {
-					frequenciesPrev = frequenciesNew.slice();
-				}
-
-			};
-
-			// apply linear interpolation
-			function lerp(oldFreq, currentFreq, lerpedFreq, alpha) {
-				for (var i = 0; i < totalFrequencies; i++) {
-					lerpedFreq[i] = oldFreq[i] + (currentFreq[i] - oldFreq[i]) * alpha;
-				}
+			decodedBuffer = buffer;
+			connectAudioGraph(buffer);
+			setStatus('ready — click the button to start audio.');
+			if (playButtonEl) {
+				playButtonEl.disabled = false;
 			}
-
-			function getDelta(currentFreq, oldFreq) {
-				var deltaSum = 0;
-
-				for (var i = 0; i < totalFrequencies; i++) {
-					deltaSum += lerpedFrequencies[i] - frequenciesPrev[i];
-				}
-				averageDelta = deltaSum / totalFrequencies;
-				if (!isNaN(averageDelta)) averageDeltas.push(averageDelta)
-			}
-
-			// calculate average of all frequency amplitudes
-			function getAverageVolume(frequencies) {
-				var amplitudeSum = 0;
-
-				for (var i = 0; i < totalFrequencies; i++) {
-					amplitudeSum += frequencies[i];
-				}
-
-				averageAmp = amplitudeSum / totalFrequencies;
-			}
-
-			clearInterval(interval);
-
-			// popup
-			$('body').append($('<div onclick="play();" id="play" style="width: ' + $(window).width() + 'px; height: ' + $(window).height() + 'px;"><div id="play_link"></div></div>'));
-			$('#play_link').css('top', ($(window).height() / 2 - $('#play_link').height() / 2) + 'px');
-			$('#play_link').css('left', ($(window).width() / 2 - $('#play_link').width() / 2) + 'px');
-			$('#play').fadeIn();
 		},
 		function(error) {
-			$('#info').text('Decoding error:' + error);
+			setStatus('Decoding error: ' + error);
 		}
 	);
 };
 
 request.send();
 
-
 request.onerror = function() {
-	$('#info').text('buffer: XHR error');
+	setStatus('Could not load the source MP3.');
 };
+
+function lerp(oldFreq, currentFreq, lerpedFreq, alpha) {
+	for (var i = 0; i < totalFrequencies; i++) {
+		lerpedFreq[i] = oldFreq[i] + (currentFreq[i] - oldFreq[i]) * alpha;
+	}
+}
+
+function getDelta(currentFreq, oldFreq) {
+	var deltaSum = 0;
+
+	for (var i = 0; i < totalFrequencies; i++) {
+		deltaSum += lerpedFrequencies[i] - frequenciesPrev[i];
+	}
+	averageDelta = deltaSum / totalFrequencies;
+	if (!isNaN(averageDelta)) averageDeltas.push(averageDelta);
+}
+
+function getAverageVolume(frequencies) {
+	var amplitudeSum = 0;
+
+	for (var i = 0; i < totalFrequencies; i++) {
+		amplitudeSum += frequencies[i];
+	}
+
+	averageAmp = amplitudeSum / totalFrequencies;
+}
 
 function displayTime(time) {
 	if (time < 60) {
@@ -177,8 +163,28 @@ function displayTime(time) {
 }
 
 function play() {
-	$('#play').fadeOut('normal', function() {
-		$(this).remove();
+	if (started || !decodedBuffer || !source) {
+		return;
+	}
+
+	var resumePromise = context.state === 'suspended' ? context.resume() : Promise.resolve();
+
+	resumePromise.then(function() {
+		started = true;
+		source.start(0);
+		if (playOverlayEl) {
+			playOverlayEl.style.display = 'none';
+		}
+		setStatus('');
+	}).catch(function(error) {
+		started = false;
+		setStatus('Could not start playback: ' + error);
 	});
-	source.start(0);
 }
+
+if (playButtonEl) {
+	playButtonEl.disabled = true;
+	playButtonEl.addEventListener('click', play);
+}
+
+setStatus('loading track…');
